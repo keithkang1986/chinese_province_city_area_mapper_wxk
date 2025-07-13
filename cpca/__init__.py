@@ -86,7 +86,8 @@ def _init_data(stop_key="([省市]|特别行政区|自治区)$") -> (dict, Match
 
 ad_2_addr_dict, matcher = _init_data()
 
-
+# 定义直辖市列表
+municipalities = ["北京市", "上海市", "天津市", "重庆市"]
 def transform(location_strs, index=None, pos_sensitive=False, umap={}):
     """将地址描述字符串转换以"省","市","区"信息为列的DataFrame表格
         Args:
@@ -112,7 +113,10 @@ def transform(location_strs, index=None, pos_sensitive=False, umap={}):
     result = pd.DataFrame(
              [_get_one_addr(sentence, pos_sensitive, umap) for sentence in location_strs],
              index=index)
-
+    # 处理直辖市的情况
+    for index, row in result.iterrows():
+        if row[_PROVINCE] in municipalities:
+            result.at[index, _CITY] = row[_PROVINCE]
     return tidy_order(result, pos_sensitive)
 
 
